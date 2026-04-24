@@ -1,0 +1,10 @@
+Part A: Complexity Analysis 
+Q1:
+The function calls itself twice in each step, so the number of operations grows exponentially.
+Time Complexity: O(2^n)
+Space Complexity: O(n)
+
+Q2:
+The outer loop runs log n times, and the inner loop also runs log n times, so total complexity is (log n)^2.
+Time Complexity: O((log n)^2)
+Space Complexity: O(1)
