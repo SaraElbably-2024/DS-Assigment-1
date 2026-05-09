@@ -48,31 +48,7 @@ public:
     }
 };
 
-// ------------- Question 2 -------------
-class nextGreaterNum {
-public:
-    vector<int> solve(const vector<int>& nums) {
-        int n = nums.size();
-        vector<int> result(n, -1);
-        stack<int> st;
-
-        for (int i = 0; i < 2 * n; i++) {
-            int current = nums[i % n];
-
-            while (!st.empty() && nums[st.top()] < current) {
-                result[st.top()] = current;
-                st.pop();
-            }
-
-            if (i < n) {
-                st.push(i);
-            }
-        }
-
-        return result;
-    }
-};
-
+ 
  
 int main() {
     ExpressionEvaluator evaluator;
@@ -85,25 +61,7 @@ int main() {
     cout << evaluator.calculate("(1+(4+5+2)-3)+(6+8)") << endl;
 
 
-    nextGreaterNum nge;
-
-    cout << " Q2 test:" << endl;
-
-    vector<int> nums1 = {1, 2, 1};
-
-    vector<int> res1 = nge.solve(nums1);
-
      
-    for (int x : res1) cout << x << " ";
-    cout << endl;
-
-    vector<int> nums2 = {1, 2, 3, 4, 3};
-
-    vector<int> res2 = nge.solve(nums2);
-
-  
-    for (int x : res2) cout << x << " ";
-    cout << endl;
 
     return 0;
 }
