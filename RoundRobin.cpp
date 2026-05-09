@@ -124,7 +124,7 @@ public:
             totalWait += p.waitingTime;
         } 
 
-        cout << "Average Waiting Time: " <<totalWait / processes.size() << endl;
+        cout << "Average Waiting Time: " << (float)totalWait / processes.size() << endl;
     }
 };
 
