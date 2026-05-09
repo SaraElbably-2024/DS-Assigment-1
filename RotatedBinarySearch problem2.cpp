@@ -1,56 +1,78 @@
 #include<iostream>
+#include<vector>
 using namespace std;
-int rotatedBinarySearch(int arr[], int n, int target, int &comparisons) {
-    int low = 0, high = n - 1;
-    while (low <= high) {
-        int mid = low + (high - low) / 2;
-        comparisons++;
-        if (arr[mid] == target)
-            return mid;
 
-        comparisons += 2;
-        if (arr[low] == arr[mid] && arr[mid] == arr[high]) {
-            low++;
-            high--;
-            continue;
-        }
+class RotatedArraySearch {
+private:
+    vector<int> arr;
+    int comparisons;
 
-        comparisons++;
-        if (arr[low] <= arr[mid]) {
+public:
+    RotatedArraySearch() : comparisons(0) {}
+    void inputArray() {
+        int n;
+        cout << "Enter the array size: ";
+        cin >> n;
+        arr.resize(n);
+        cout << "Enter array elements: ";
+        for (int i = 0; i < n; i++)
+            cin >> arr[i];
+    }
+    int search(int target) {
+        comparisons = 0;
+        int low = 0, high = arr.size() - 1;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
             comparisons++;
-            if (arr[low] <= target && target < arr[mid])
-                high = mid - 1;
-            else
-                low = mid + 1;
+
+            if (arr[mid] == target)
+                return mid;
+
+            comparisons += 2;
+            if (arr[low] == arr[mid] && arr[mid] == arr[high]) {
+                low++;
+                high--;
+                continue;
+            }
+
+            comparisons++;
+            if (arr[low] <= arr[mid]) {
+                comparisons++;
+                if (arr[low] <= target && target < arr[mid])
+                    high = mid - 1;
+                else
+                    low = mid + 1;
+            } else {
+                comparisons++;
+                if (arr[mid] < target && target <= arr[high])
+                    low = mid + 1;
+                else
+                    high = mid - 1;
+            }
         }
-        else {
-            comparisons++; 
-            if (arr[mid] < target && target <= arr[high])
-                low = mid + 1;
-            else
-                high = mid - 1;
-        }
+        return -1;
+    }
+    void displayResult(int target) {
+        int result = search(target);
+        cout << "Index: " << result << endl;
+        cout << "Comparisons: " << comparisons << endl;
     }
 
-    return -1;
-}
+    // Getter for comparisons
+    int getComparisons() {
+        return comparisons;
+    }
+};
 
 int main() {
-    int n;
-    cout << "inter the array size" << endl;
-    cin>>n;
-    int arr[n] ;
-    cout << "enter array elements" << endl;
-    for(int i=0;i<n;i++) {
-        cin>>arr[i];
-    }
-    int target ;
-    cout<<"enter target value"<<endl;
-    cin>>target;
-    int comparisons = 0;
-    int result = rotatedBinarySearch(arr, n, target, comparisons);
-    cout << "Index: " << result << endl;
-    cout << "Comparisons: " << comparisons << endl;
+    RotatedArraySearch searcher;
+    searcher.inputArray();
+    int target;
+    cout << "Enter target value: ";
+    cin >> target;
+
+    searcher.displayResult(target);
 
     return 0;
 }
