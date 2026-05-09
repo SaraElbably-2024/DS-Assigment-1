@@ -1,123 +1,150 @@
-#include<iostream>
-#include<queue>
-#include<vector>
-#include<algorithm>
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <algorithm>
+
 using namespace std;
 
-struct process{
+class Process {
+public:
     int id;
-    int arrival_time;
-    int burst_time;
-    int remaining_time;
-    int completion_time;
-    int turnround_time;
-    int waiting_time;
+    int arrivalTime;
+    int burstTime;
+    int remainingTime;
+    int completionTime;
+    int turnaroundTime;
+    int waitingTime;
+
+    Process(int id, int arrival, int burst) {
+        this->id = id;
+        this->arrivalTime = arrival;
+        this->burstTime = burst;
+        this->remainingTime = burst;
+        this->completionTime = 0;
+        this->turnaroundTime = 0;
+        this->waitingTime = 0;
+    }
+
+    void calculateMetrics(int finishTime) {
+        completionTime = finishTime;
+        turnaroundTime = completionTime - arrivalTime;
+        waitingTime = turnaroundTime - burstTime;
+    }
 };
 
-void PrintQueue(queue<int> q){
-    if(q.empty()){
-        cout << endl << "[ Empty ]" << endl << endl;
-        return;
-    }
-    cout << endl << "[ ";
-    while(!q.empty()){
-        cout<< "p" <<(q.front() + 1);
-        q.pop();
-        if (!q.empty()) cout<< ", " ;
-    }
-    cout<< " ]";
-}
+class RoundRobinScheduler {
+private:
+    vector<Process> processes;
+    int quantum;
+    int currentTime;
 
-void RoundRobin(vector<process>& processes, int QuantumTime){
-    sort(processes.begin(), processes.end(), [](const process& a, const process& b){return a.arrival_time < b.arrival_time;});
-    queue<int> ReadyQueue; // stores IDs of processes
-    int currentTime = 0;
-    int completed = 0;
-    int NumOfProcesses = processes.size();
-    int IdxNextProcess = 0;
-
-    while(completed < NumOfProcesses){
-        // push processes' IDs in ReadyQueue if its arrival time < current time
-        while((IdxNextProcess < NumOfProcesses) && (processes[IdxNextProcess].arrival_time <= currentTime)){
-            ReadyQueue.push(IdxNextProcess);
-            IdxNextProcess++;
+    void printQueue(queue<int> q) {
+        if (q.empty()) {
+            cout << "\n[ Empty ]\n";
+            return;
         }
-
-        // if there aren't ready processes, increase current time to the next processes' arrival time
-        // no need to check if there are processes or not cuz we wouldn't be here if there aren't processes
-        if(ReadyQueue.empty()){
-            currentTime = processes[IdxNextProcess].arrival_time;
-            continue;
+        cout << "\n[ ";
+        while (!q.empty()) {
+            cout << "p" << processes[q.front()].id;
+            q.pop();
+            if (!q.empty()) cout << ", ";
         }
+        cout << " ]";
+    }
 
-        // get the current process to excute 
-        // update current time , remaining time
-        int currentIdx = ReadyQueue.front(); 
-        process& currentProcess = processes[(currentIdx)];
-        ReadyQueue.pop();
+public:
+    RoundRobinScheduler(int q) : quantum(q), currentTime(0) {}
 
-        int TimeToSpend = min(currentProcess.remaining_time, QuantumTime);
-        currentTime += TimeToSpend; // current time = past time + spentTime to excute
-        currentProcess.remaining_time -= TimeToSpend ; // Remaining time = Remaining time for the process - spentTime to excute
+    void addProcess(int id, int arrival, int burst) {
+        processes.push_back(Process(id, arrival, burst));
+    }
+
+    void execute() {
         
+        sort(processes.begin(), processes.end(), [](const Process& a, const Process& b) {
+            return a.arrivalTime < b.arrivalTime;
+        });
 
-        // ensure if there are processes arrived during excuting the current process or not
-        while((IdxNextProcess < NumOfProcesses) && (processes[IdxNextProcess].arrival_time <= currentTime)){
-            ReadyQueue.push(IdxNextProcess);
-            IdxNextProcess++;
-        }
+        queue<int> readyQueue; // stores IDs of processes
+        int completed = 0;
+        int NumOfProcesses = processes.size();
+        int nextIdx = 0;
 
-        // if process didn't be finished yet , turn it back to Ready Queue
-        if(currentProcess.remaining_time > 0){
-            ReadyQueue.push(currentIdx);
-        }
-        // if finished, update completion_time, turnround_time, waiting_time and completed processes
-        else{
-            completed++;
-            currentProcess.completion_time = currentTime;
-            currentProcess.turnround_time = currentProcess.completion_time - currentProcess.arrival_time;
-            currentProcess.waiting_time = currentProcess.turnround_time - currentProcess.burst_time;
-        }
+        while (completed < NumOfProcesses) {
+            // push processes' IDs in ReadyQueue if its arrival time < current time
+            while (nextIdx < NumOfProcesses && processes[nextIdx].arrivalTime <= currentTime) {
+                readyQueue.push(nextIdx);
+                nextIdx++;
+            }
 
-        PrintQueue(ReadyQueue);
+            // if there aren't ready processes, increase current time to the next processes' arrival time
+            // no need to check if there are processes or not cuz we wouldn't be here if there aren't processes
+            if (readyQueue.empty()) {
+                currentTime = processes[nextIdx].arrivalTime;
+                continue;
+            }
+
+            // get the current process to excute 
+            // update current time , remaining time
+            int currentIdx = readyQueue.front();
+            Process& currentProcess = processes[(currentIdx)];
+            readyQueue.pop();
+
+            int timeToSpend = min(currentProcess.remainingTime, quantum);
+            currentTime += timeToSpend; // current time = past time + spentTime to excute
+            currentProcess.remainingTime -= timeToSpend; // Remaining time = Remaining time for the process - spentTime to excute
+
+            // ensure if there are processes arrived during excuting the current process or not
+            while (nextIdx < NumOfProcesses && currentProcess.arrivalTime <= currentTime) {
+                readyQueue.push(nextIdx);
+                nextIdx++;
+            }
+
+             // if process didn't be finished yet , turn it back to Ready Queue
+             // if finished, update completion_time, turnround_time, waiting_time and completed processes
+            if (currentProcess.remainingTime > 0) {
+                readyQueue.push(currentIdx);
+            } else {
+                completed++;
+                currentProcess.calculateMetrics(currentTime);
+            }
+
+            printQueue(readyQueue);
+        }
+        displayResults();
     }
 
-    cout<<"Process        Completion Time        Turnaround Time        Waiting Time" << endl;
-    for(int i =0; i<NumOfProcesses; i++){
-        cout<<"p"<<processes[i].id << "             " << processes[i].completion_time
-        << "                      " << processes[i].turnround_time
-        << "                      " << processes[i].waiting_time << endl << endl; 
-    } 
-    
-    int sumWaitTime = 0;
-    for(int i =0; i<NumOfProcesses; i++){
-        sumWaitTime += processes[i].waiting_time;
-    } 
-    cout << "Average Waiting Time: " <<sumWaitTime / (float)NumOfProcesses << endl;
-}
+    void displayResults() {
+        int totalWait = 0;
+        cout<<"Process        Completion Time        Turnaround Time        Waiting Time" << endl;
+        for(const auto& p : processes){
+            cout<<"p"<<p.id << "             " << p.completionTime
+            << "                      " << p.turnaroundTime
+            << "                      " << p.waitingTime << endl << endl; 
+            totalWait += p.waitingTime;
+        } 
 
-int main(){
-    vector<process> processes;
-    int Num;
-    cout<< "How many processes will be excuted?" << endl;
-    cin>> Num;
+        cout << "Average Waiting Time: " <<totalWait / processes.size() << endl;
+    }
+};
 
-    int QT;
-    cout<< endl << "what is the Quantum Time ?" << endl;
-    cin >> QT;
+int main() {
+    int num, qt;
+    cout << "How many processes? ";
+    cin >> num;
+    cout << "Quantum Time: ";
+    cin >> qt;
 
-    for(int i = 0; i < Num; i++){
-        int id = i+1;
+    RoundRobinScheduler scheduler(qt);
+
+    for (int i = 0; i < num; i++) {
         int arrival, burst;
-
-        cout << endl << "Enter Arrival and Needed time for P" << id << ": " ;
+        cout << "Enter Arrival and Burst for P" << (i + 1) << ": ";
         cin >> arrival >> burst;
-
-        processes.push_back({id, arrival, burst, burst});
+        scheduler.addProcess(i + 1, arrival, burst);
     }
 
-    RoundRobin(processes, QT);
+    scheduler.execute();
 
     return 0;
-
 }
