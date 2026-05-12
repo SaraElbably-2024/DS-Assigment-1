@@ -1,11 +1,11 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <string>
 using namespace std;
 
 // ================= BOOK =================
 
-// Structure To Store Book Information
 struct Book {
     int id;
     string title;
@@ -20,7 +20,6 @@ struct Book {
 
 // ================= BST =================
 
-// BST Node
 class BSTNode {
 public:
     Book data;
@@ -41,7 +40,7 @@ public:
         root = NULL;
     }
 
-    // Insert New Book In BST
+    // Insert New Book
     BSTNode* insert(BSTNode* root, Book book) {
 
         if (root == NULL)
@@ -60,7 +59,7 @@ public:
         root = insert(root, book);
     }
 
-    // Search For Book In BST
+    // Search For Book
     BSTNode* search(BSTNode* root, int id) {
 
         if (root == NULL)
@@ -80,15 +79,13 @@ public:
         BSTNode* result = search(root, id);
 
         if (result != NULL) {
-
-            cout << "Book Found\n";
+            cout << "Book Found!\n";
             cout << "Book ID: " << result->data.id << endl;
-            cout << "Title: " << result->data.title << endl;
-            cout << "Author: " << result->data.author << endl;
+            cout << "Title:   " << result->data.title << endl;
+            cout << "Author:  " << result->data.author << endl;
         }
-
         else {
-            cout << "Book Not Found\n";
+            cout << "Book Not Found.\n";
         }
     }
 
@@ -101,7 +98,7 @@ public:
         return root;
     }
 
-    // Delete Book From BST
+    // Delete Book
     BSTNode* deleteNode(BSTNode* root, int id) {
 
         if (root == NULL)
@@ -123,14 +120,12 @@ public:
 
             // One Child
             else if (root->left == NULL) {
-
                 BSTNode* temp = root->right;
                 delete root;
                 return temp;
             }
 
             else if (root->right == NULL) {
-
                 BSTNode* temp = root->left;
                 delete root;
                 return temp;
@@ -138,11 +133,8 @@ public:
 
             // Two Children
             else {
-
                 BSTNode* temp = findMin(root->right);
-
                 root->data = temp->data;
-
                 root->right = deleteNode(root->right, temp->data.id);
             }
         }
@@ -162,12 +154,15 @@ public:
 
         inorder(root->left);
 
-        cout << "Book ID: " << root->data.id << endl;
-        cout << "Title: " << root->data.title << endl;
-        cout << "Author: " << root->data.author << endl;
-        cout << "------------------\n";
+        cout << "ID: " << root->data.id
+             << " | Title: " << root->data.title
+             << " | Author: " << root->data.author << "\n";
 
         inorder(root->right);
+    }
+
+    void inorder() {
+        inorder(root);
     }
 
     // Calculate Height
@@ -204,11 +199,71 @@ public:
 
         return steps;
     }
+
+    int searchSteps(int id) {
+        return searchSteps(root, id);
+    }
+
+    // Print Books In ID Range
+    void printInRange(BSTNode* root, int minID, int maxID) {
+
+        if (root == NULL)
+            return;
+
+        if (root->data.id > minID)
+            printInRange(root->left, minID, maxID);
+
+        if (root->data.id >= minID && root->data.id <= maxID) {
+            cout << "ID: " << root->data.id
+                 << " | Title: " << root->data.title
+                 << " | Author: " << root->data.author << "\n";
+        }
+
+        if (root->data.id < maxID)
+            printInRange(root->right, minID, maxID);
+    }
+
+    void printInRange(int minID, int maxID) {
+        printInRange(root, minID, maxID);
+    }
+
+    // Find Closest Book ID
+    int closestID(BSTNode* root, int target) {
+
+        int closest = root->data.id;
+
+        while (root != NULL) {
+
+            if (abs(root->data.id - target) < abs(closest - target))
+                closest = root->data.id;
+
+            if (target < root->data.id)
+                root = root->left;
+
+            else if (target > root->data.id)
+                root = root->right;
+
+            else
+                return root->data.id;
+        }
+
+        return closest;
+    }
+
+    void closestID(int target) {
+
+        if (root == NULL) {
+            cout << "Tree Is Empty.\n";
+            return;
+        }
+
+        cout << "Closest Book ID to " << target << ": "
+             << closestID(root, target) << "\n";
+    }
 };
 
 // ================= AVL =================
 
-// AVL Node
 class AVLNode {
 public:
     Book data;
@@ -355,15 +410,13 @@ public:
         AVLNode* result = search(root, id);
 
         if (result != NULL) {
-
-            cout << "Book Found\n";
+            cout << "Book Found!\n";
             cout << "Book ID: " << result->data.id << endl;
-            cout << "Title: " << result->data.title << endl;
-            cout << "Author: " << result->data.author << endl;
+            cout << "Title:   " << result->data.title << endl;
+            cout << "Author:  " << result->data.author << endl;
         }
-
         else {
-            cout << "Book Not Found\n";
+            cout << "Book Not Found.\n";
         }
     }
 
@@ -375,12 +428,15 @@ public:
 
         inorder(root->left);
 
-        cout << "Book ID: " << root->data.id << endl;
-        cout << "Title: " << root->data.title << endl;
-        cout << "Author: " << root->data.author << endl;
-        cout << "------------------\n";
+        cout << "ID: " << root->data.id
+             << " | Title: " << root->data.title
+             << " | Author: " << root->data.author << "\n";
 
         inorder(root->right);
+    }
+
+    void inorder() {
+        inorder(root);
     }
 
     // Find Minimum
@@ -419,7 +475,6 @@ public:
                     temp = root;
                     root = NULL;
                 }
-
                 else {
                     *root = *temp;
                 }
@@ -430,9 +485,7 @@ public:
             else {
 
                 AVLNode* temp = findMin(root->right);
-
                 root->data = temp->data;
-
                 root->right = deleteNode(root->right, temp->data.id);
             }
         }
@@ -477,11 +530,9 @@ public:
             printInRange(root->left, minID, maxID);
 
         if (root->data.id >= minID && root->data.id <= maxID) {
-
-            cout << "Book ID: " << root->data.id << endl;
-            cout << "Title: " << root->data.title << endl;
-            cout << "Author: " << root->data.author << endl;
-            cout << "------------------\n";
+            cout << "ID: " << root->data.id
+                 << " | Title: " << root->data.title
+                 << " | Author: " << root->data.author << "\n";
         }
 
         if (root->data.id < maxID)
@@ -492,7 +543,7 @@ public:
         printInRange(root, minID, maxID);
     }
 
-    // Closest Book ID
+    // Find Closest Book ID
     int closestID(AVLNode* root, int target) {
 
         int closest = root->data.id;
@@ -518,13 +569,12 @@ public:
     void closestID(int target) {
 
         if (root == NULL) {
-            cout << "Tree Is Empty\n";
+            cout << "Tree Is Empty.\n";
             return;
         }
 
-        cout << "Closest Book ID: "
-             << closestID(root, target)
-             << endl;
+        cout << "Closest Book ID to " << target << ": "
+             << closestID(root, target) << "\n";
     }
 
     int treeHeight() {
@@ -552,6 +602,10 @@ public:
 
         return steps;
     }
+
+    int searchSteps(int id) {
+        return searchSteps(root, id);
+    }
 };
 
 // ================= MAIN =================
@@ -561,98 +615,127 @@ int main() {
     BST bst;
     AVL avl;
 
-    int randomIDs[] = {
-        50,10,70,20,90,
-        15,35,80,60,5,
-        95,1,40,65,25,
-        85,75,55,45,30
+    // 20 Books With Random IDs
+    Book books[] = {
+        Book(50,  "The Great Gatsby",         "F. Scott Fitzgerald"),
+        Book(10,  "To Kill a Mockingbird",    "Harper Lee"),
+        Book(70,  "1984",                     "George Orwell"),
+        Book(20,  "Pride and Prejudice",      "Jane Austen"),
+        Book(90,  "The Catcher in the Rye",   "J.D. Salinger"),
+        Book(15,  "Brave New World",          "Aldous Huxley"),
+        Book(35,  "The Hobbit",               "J.R.R. Tolkien"),
+        Book(80,  "Fahrenheit 451",           "Ray Bradbury"),
+        Book(60,  "Jane Eyre",                "Charlotte Bronte"),
+        Book(5,   "Moby Dick",                "Herman Melville"),
+        Book(95,  "War and Peace",            "Leo Tolstoy"),
+        Book(1,   "Crime and Punishment",     "Fyodor Dostoevsky"),
+        Book(40,  "The Alchemist",            "Paulo Coelho"),
+        Book(65,  "The Picture of Dorian Gray","Oscar Wilde"),
+        Book(25,  "Anna Karenina",            "Leo Tolstoy"),
+        Book(85,  "Les Miserables",           "Victor Hugo"),
+        Book(75,  "Don Quixote",              "Miguel de Cervantes"),
+        Book(55,  "Wuthering Heights",        "Emily Bronte"),
+        Book(45,  "Great Expectations",       "Charles Dickens"),
+        Book(30,  "The Odyssey",              "Homer")
     };
 
     for (int i = 0; i < 20; i++) {
-
-        Book b(
-            randomIDs[i],
-            "Book",
-            "Author"
-        );
-
-        bst.insert(b);
-        avl.insert(b);
+        bst.insert(books[i]);
+        avl.insert(books[i]);
     }
 
-    cout << "===== BST INORDER =====\n\n";
-    bst.inorder(bst.root);
+    // ===== INORDER TRAVERSAL =====
+    cout << "========================================\n";
+    cout << "         BST - INORDER TRAVERSAL        \n";
+    cout << "========================================\n";
+    bst.inorder();
 
-    cout << "\n===== AVL INORDER =====\n\n";
-    avl.inorder(avl.root);
+    cout << "\n========================================\n";
+    cout << "         AVL - INORDER TRAVERSAL        \n";
+    cout << "========================================\n";
+    avl.inorder();
 
-    cout << "\n===== SEARCH =====\n";
+    // ===== SEARCH =====
+    cout << "\n========================================\n";
+    cout << "                 SEARCH                 \n";
+    cout << "========================================\n";
+    cout << "[BST] Searching for ID 65:\n";
+    bst.search(65);
+    cout << "\n[AVL] Searching for ID 65:\n";
     avl.search(65);
 
-    cout << "\n===== DELETE BOOK =====\n";
+    // ===== DELETE =====
+    cout << "\n========================================\n";
+    cout << "                 DELETE                 \n";
+    cout << "========================================\n";
+    cout << "Deleting Book ID 35 from both trees...\n\n";
+    bst.deleteBook(35);
     avl.deleteBook(35);
+    cout << "[BST] After Delete:\n";
+    bst.inorder();
+    cout << "\n[AVL] After Delete:\n";
+    avl.inorder();
 
-    cout << "After Delete:\n";
-    avl.inorder(avl.root);
-
-    cout << "\n===== RANGE SEARCH =====\n";
+    // ===== RANGE SEARCH =====
+    cout << "\n========================================\n";
+    cout << "              RANGE SEARCH              \n";
+    cout << "========================================\n";
+    cout << "[BST] Books with IDs between 20 and 70:\n";
+    bst.printInRange(20, 70);
+    cout << "\n[AVL] Books with IDs between 20 and 70:\n";
     avl.printInRange(20, 70);
 
-    cout << "\n===== CLOSEST ID =====\n";
+    // ===== CLOSEST ID =====
+    cout << "\n========================================\n";
+    cout << "               CLOSEST ID               \n";
+    cout << "========================================\n";
+    cout << "[BST] ";
+    bst.closestID(77);
+    cout << "[AVL] ";
     avl.closestID(77);
 
-    cout << "\n===== COMPARISON =====\n";
+    // ===== COMPARISON - RANDOM IDs =====
+    cout << "\n========================================\n";
+    cout << "       COMPARISON - RANDOM IDs          \n";
+    cout << "========================================\n";
+    cout << "BST Height:         " << bst.treeHeight() << "\n";
+    cout << "AVL Height:         " << avl.treeHeight() << "\n";
+    cout << "BST Search Steps (ID=90): " << bst.searchSteps(90) << "\n";
+    cout << "AVL Search Steps (ID=90): " << avl.searchSteps(90) << "\n";
 
-    cout << "BST Height: "
-         << bst.treeHeight()
-         << endl;
-
-    cout << "AVL Height: "
-         << avl.treeHeight()
-         << endl;
-
-    cout << "BST Search Steps: "
-         << bst.searchSteps(bst.root, 90)
-         << endl;
-
-    cout << "AVL Search Steps: "
-         << avl.searchSteps(avl.root, 90)
-         << endl;
-
-    // ===== SORTED IDS =====
-
+    // ===== COMPARISON - SORTED IDs =====
     BST bst2;
     AVL avl2;
 
-    for (int i = 10; i <= 200; i += 10) {
+    string sortedTitles[] = {
+        "Book Alpha","Book Beta","Book Gamma","Book Delta","Book Epsilon",
+        "Book Zeta","Book Eta","Book Theta","Book Iota","Book Kappa",
+        "Book Lambda","Book Mu","Book Nu","Book Xi","Book Omicron",
+        "Book Pi","Book Rho","Book Sigma","Book Tau","Book Upsilon"
+    };
 
-        Book b(
-            i,
-            "SortedBook",
-            "Author"
-        );
-
+    for (int i = 0; i < 20; i++) {
+        Book b((i + 1) * 10, sortedTitles[i], "Author " + to_string(i + 1));
         bst2.insert(b);
         avl2.insert(b);
     }
 
-    cout << "\n===== SORTED IDS COMPARISON =====\n";
+    cout << "\n========================================\n";
+    cout << "       COMPARISON - SORTED IDs          \n";
+    cout << "========================================\n";
+    cout << "BST Height:         " << bst2.treeHeight() << "\n";
+    cout << "AVL Height:         " << avl2.treeHeight() << "\n";
+    cout << "BST Search Steps (ID=190): " << bst2.searchSteps(190) << "\n";
+    cout << "AVL Search Steps (ID=190): " << avl2.searchSteps(190) << "\n";
 
-    cout << "BST Height: "
-         << bst2.treeHeight()
-         << endl;
-
-    cout << "AVL Height: "
-         << avl2.treeHeight()
-         << endl;
-
-    cout << "BST Search Steps: "
-         << bst2.searchSteps(bst2.root, 190)
-         << endl;
-
-    cout << "AVL Search Steps: "
-         << avl2.searchSteps(avl2.root, 190)
-         << endl;
+    cout << "\n========================================\n";
+    cout << "               SUMMARY                  \n";
+    cout << "========================================\n";
+    cout << "Random IDs -> BST Height: " << bst.treeHeight()
+         << " | AVL Height: " << avl.treeHeight() << "\n";
+    cout << "Sorted IDs -> BST Height: " << bst2.treeHeight()
+         << " | AVL Height: " << avl2.treeHeight() << "\n";
+    cout << "(Sorted IDs expose BST worst case: linear height)\n";
 
     return 0;
 }
